@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>保險業務 AI 實戰課程｜了解意願登記</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --ink-soft: #3d3d5c;
+    --ink-muted: #7b7b9a;
+    --gold: #c9a84c;
+    --gold-light: #f0d98a;
+    --gold-pale: #fdf8ec;
+    --teal: #2a7d6f;
+    --teal-light: #e8f5f3;
+    --teal-mid: #4aab98;
+    --cream: #faf8f4;
+    --white: #ffffff;
+    --border: #e8e4dc;
+    --border-focus: #c9a84c;
+    --shadow-sm: 0 2px 8px rgba(26,26,46,0.06);
+    --shadow-md: 0 8px 32px rgba(26,26,46,0.10);
+    --shadow-lg: 0 20px 60px rgba(26,26,46,0.14);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-xs: 6px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── background texture ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 800px 600px at 10% 20%, rgba(42,125,111,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 600px 800px at 90% 80%, rgba(201,168,76,0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── layout ── */
+  .page-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ── hero header ── */
+  .hero {
+    text-align: center;
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(24px);
+    animation: fadeUp 0.7s ease forwards;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--teal-light);
+    color: var(--teal);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--teal-mid);
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
+  }
+
+  .hero h1 {
+    font-family: 'Noto Serif TC', serif;
+    font-size: clamp(26px, 5vw, 36px);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.35;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--teal);
+  }
+
+  .hero p {
+    font-size: 15px;
+    color: var(--ink-muted);
+    line-height: 1.8;
+    max-width: 480px;
+    margin: 0 auto 28px;
+  }
+
+  /* ── social proof strip ── */
+  .proof-strip {
+    display: flex;
+    gap: 0;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp 0.7s 0.15s ease forwards;
+  }
+
+  .proof-item {
+    flex: 1;
+    padding: 16px 12px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .proof-item:last-child { border-right: none; }
+
+  .proof-num {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--teal);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .proof-label {
+    font-size: 11px;
+    color: var(--ink-muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── scarcity banner ── */
+  .scarcity {
+    background: linear-gradient(135deg, #1a3a35 0%, #2a7d6f 100%);
+    border-radius: var(--radius-sm);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.25s ease forwards;
+  }
+
+  .scarcity-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .scarcity p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.9);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .scarcity strong {
+    color: var(--gold-light);
+    font-weight: 500;
+  }
+
+  /* ── progress bar ── */
+  .progress-wrap {
+    margin-bottom: 36px;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.3s ease forwards;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-bottom: 8px;
+  }
+
+  .progress-track {
+    height: 4px;
+    background: var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal-mid), var(--gold));
+    border-radius: 100px;
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+
+  /* ── step sections ── */
+  .step-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+
+  .step-block.visible {
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .step-block:hover {
+    box-shadow: var(--shadow-md);
+    border-color: #d8d4cc;
+  }
+
+  .step-block:focus-within {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.12), var(--shadow-sm);
+  }
+
+  /* step number badge */
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px; height: 26px;
+    background: var(--teal-light);
+    color: var(--teal);
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+
+  .step-block label.main-label {
+    display: block;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .step-block .hint {
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-bottom: 14px;
+    line-height: 1.6;
+  }
+
+  .required-star { color: #c0392b; margin-left: 2px; }
+
+  /* ── inputs ── */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  textarea {
+    width: 100%;
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-xs);
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: 'Noto Sans TC', sans-serif;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="tel"]:focus,
+  textarea:focus {
+    border-color: var(--border-focus);
+    background: var(--gold-pale);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: #bbb;
+    font-size: 13px;
+  }
+
+  textarea { resize: vertical; min-height: 80px; line-height: 1.7; }
+
+  /* contact group */
+  .contact-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .contact-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .contact-tag {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    background: var(--teal-light);
+    padding: 6px 10px;
+    border-radius: var(--radius-xs);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* radio / checkbox */
+  .choice-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .choice-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    font-size: 14px;
+    color: var(--ink);
+    user-select: none;
+  }
+
+  .choice-item:hover {
+    border-color: var(--teal-mid);
+    background: var(--teal-light);
+  }
+
+  .choice-item input[type="radio"],
+  .choice-item input[type="checkbox"] {
+    width: 17px; height: 17px;
+    accent-color: var(--teal);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .choice-item.checked {
+    border-color: var(--teal);
+    background: var(--teal-light);
+  }
+
+  /* other input reveal */
+  .other-input {
+    margin-top: 8px;
+    display: none;
+  }
+  .other-input.show { display: block; }
+
+  /* ── contact section header ── */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0 16px;
+  }
+
+  .section-divider span {
+    font-size: 12px;
+    color: var(--ink-muted);
+    white-space: nowrap;
+  }
+
+  .section-divider::before,
+  .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── illustration band ── */
+  .illustration-band {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.7s 0.4s ease forwards;
+  }
+
+  .illus-svg { flex-shrink: 0; }
+
+  .illus-text h3 {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .illus-text p {
+    font-size: 13px;
+    color: var(--ink-muted);
+    line-height: 1.7;
+  }
+
+  /* ── submit area ── */
+  .submit-wrap {
+    text-align: center;
+    margin-top: 32px;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.5s ease forwards;
+  }
+
+  .submit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #2a7d6f 0%, #1d6055 100%);
+    color: #fff;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 16px 48px;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(42,125,111,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.04em;
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(42,125,111,0.4);
+  }
+
+  .submit-btn:active { transform: scale(0.98); }
+
+  .submit-note {
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-top: 14px;
+    line-height: 1.7;
+  }
+
+  /* ── thank you state ── */
+  .thank-you {
+    display: none;
+    text-align: center;
+    padding: 60px 32px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+  }
+
+  .thank-you.show { display: block; }
+
+  .thank-icon {
+    width: 72px; height: 72px;
+    background: var(--teal-light);
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+  }
+
+  .thank-you h2 {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+
+  .thank-you p {
+    font-size: 14px;
+    color: var(--ink-muted);
+    line-height: 1.8;
+  }
+
+  /* ── keyframes ── */
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* ── mobile ── */
+  @media (max-width: 520px) {
+    .page-wrap { padding: 32px 16px 60px; }
+    .step-block { padding: 22px 20px; }
+    .proof-strip { flex-wrap: wrap; }
+    .proof-item { min-width: 50%; border-right: none; border-bottom: 1px solid var(--border); }
+    .proof-item:last-child { border-bottom: none; }
+    .contact-row { grid-template-columns: 70px 1fr; }
+    .illustration-band { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <!-- ── HERO ── -->
+  <div class="hero">
+    <div class="hero-badge">保險業務 × AI 實戰應用</div>
+    <h1>讓你的團隊，<br>用 <em>AI</em> 跑得更快</h1>
+    <p>課程專為保險業務設計，從保單白話化到客戶跟進，把 AI 真正用進每天的工作流程。</p>
+  </div>
+
+  <!-- ── SOCIAL PROOF ── -->
+  <div class="proof-strip">
+    <div class="proof-item">
+      <span class="proof-num">6+</span>
+      <span class="proof-label">實務應用場景</span>
+    </div>
+    <div class="proof-item">
+      <span class="proof-num">客製</span>
+      <span class="proof-label">依團隊規模調整</span>
+    </div>
+    <div class="proof-item">
+      <span class="proof-num">持續</span>
+      <span class="proof-label">課綱更新不過時</span>
+    </div>
+  </div>
+
+  <!-- ── SCARCITY ── -->
+  <div class="scarcity">
+    <span class="scarcity-icon">🎯</span>
+    <p>目前開放<strong>初步諮詢說明</strong>，不需立即決定報名。<br>填寫完成後由專人整理資訊，<strong>於方便時段與你聯繫</strong>。</p>
+  </div>
+
+  <!-- ── ILLUSTRATION BAND ── -->
+  <div class="illustration-band">
+    <svg class="illus-svg" width="90" height="90" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- notebook -->
+      <rect x="12" y="10" width="52" height="66" rx="6" fill="#e8f5f3"/>
+      <rect x="12" y="10" width="8" height="66" rx="3" fill="#4aab98" opacity="0.5"/>
+      <!-- lines -->
+      <rect x="26" y="26" width="30" height="3" rx="1.5" fill="#2a7d6f" opacity="0.35"/>
+      <rect x="26" y="34" width="22" height="3" rx="1.5" fill="#2a7d6f" opacity="0.25"/>
+      <rect x="26" y="42" width="26" height="3" rx="1.5" fill="#2a7d6f" opacity="0.25"/>
+      <!-- AI badge -->
+      <circle cx="66" cy="62" r="20" fill="#1a3a35"/>
+      <text x="66" y="67" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#f0d98a">AI</text>
+      <!-- sparkles -->
+      <circle cx="72" cy="20" r="3" fill="#c9a84c" opacity="0.7"/>
+      <circle cx="80" cy="32" r="2" fill="#c9a84c" opacity="0.5"/>
+      <circle cx="68" cy="14" r="2" fill="#4aab98" opacity="0.6"/>
+    </svg>
+    <div class="illus-text">
+      <h3>只需要 3 分鐘</h3>
+      <p>填完這份表單，我們就能針對你的團隊規模與需求，準備最合適的課程說明給你。</p>
+    </div>
+  </div>
+
+  <!-- ── PROGRESS ── -->
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>填寫進度</span>
+      <span id="progress-pct">0 / 7 題</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- ── FORM ── -->
+  <form id="main-form" novalidate action="https://formsubmit.co/YOUR_EMAIL_HERE" method="POST">
+    <!-- FormSubmit 設定 -->
+    <input type="hidden" name="_subject" value="【保險 AI 課程】新的意願登記表單">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_next" value="">
+    <input type="text" name="_honey" style="display:none">
+
+    <!-- Q1 稱呼 -->
+    <div class="step-block visible" style="animation-delay:0.35s">
+      <div class="step-num">1</div>
+      <label class="main-label" for="q1">你的稱呼<span class="required-star">*</span></label>
+      <p class="hint">讓我們知道怎麼稱呼你</p>
+      <input type="text" id="q1" name="name" placeholder="例如：王小明、小明" autocomplete="name" data-required>
+    </div>
+
+    <!-- Q2 所屬公司 -->
+    <div class="step-block visible" style="animation-delay:0.42s">
+      <div class="step-num">2</div>
+      <label class="main-label" for="q2">所屬保險公司或保經公司<span class="required-star">*</span></label>
+      <p class="hint">有助於我們了解你的業務背景</p>
+      <input type="text" id="q2" name="company" placeholder="例如：國泰人壽、富邦人壽、某某保經…" data-required>
+    </div>
+
+    <!-- Q3 聯繫方式 -->
+    <div class="step-block visible" style="animation-delay:0.49s">
+      <div class="step-num">3</div>
+      <label class="main-label">方便聯繫的方式<span class="required-star">*</span></label>
+      <p class="hint">請至少填寫一項，我們會選最方便你的方式聯繫</p>
+      <div class="contact-group">
+        <div class="contact-row">
+          <span class="contact-tag">LINE ID</span>
+          <input type="text" name="line" placeholder="你的 LINE ID" data-contact>
+        </div>
+        <div class="contact-row">
+          <span class="contact-tag">手機號碼</span>
+          <input type="tel" name="phone" placeholder="09xx-xxx-xxx" data-contact>
+        </div>
+        <div class="contact-row">
+          <span class="contact-tag">Email</span>
+          <input type="email" name="email" placeholder="example@mail.com" data-contact>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q4 身份 -->
+    <div class="step-block visible" style="animation-delay:0.56s">
+      <div class="step-num">4</div>
+      <label class="main-label">你目前是？<span class="required-star">*</span></label>
+      <p class="hint">幫助我們準備最合適的說明角度</p>
+      <div class="choice-list" id="role-list">
+        <label class="choice-item"><input type="radio" name="role" value="業務夥伴"> 業務夥伴</label>
+        <label class="choice-item"><input type="radio" name="role" value="主管"> 主管</label>
+        <label class="choice-item"><input type="radio" name="role" value="單位負責人"> 單位負責人</label>
+        <label class="choice-item"><input type="radio" name="role" value="其他"> 其他</label>
+      </div>
+      <div class="other-input" id="role-other-wrap">
+        <input type="text" id="role-other" name="role_other" placeholder="請說明你的身份">
+      </div>
+    </div>
+
+    <!-- Q5 人數 -->
+    <div class="step-block visible" style="animation-delay:0.63s">
+      <div class="step-num">5</div>
+      <label class="main-label">團隊或單位大約人數<span class="required-star">*</span></label>
+      <p class="hint">大概範圍即可，用來評估最適合的課程規格</p>
+      <div class="choice-list" id="size-list">
+        <label class="choice-item"><input type="radio" name="size" value="1–5 人"> 1–5 人</label>
+        <label class="choice-item"><input type="radio" name="size" value="6–15 人"> 6–15 人</label>
+        <label class="choice-item"><input type="radio" name="size" value="16–30 人"> 16–30 人</label>
+        <label class="choice-item"><input type="radio" name="size" value="31 人以上"> 31 人以上</label>
+      </div>
+    </div>
+
+    <!-- Q6 想了解 -->
+    <div class="step-block visible" style="animation-delay:0.70s">
+      <div class="step-num">6</div>
+      <label class="main-label">你比較想了解哪些方向？<span class="required-star">*</span></label>
+      <p class="hint">可複選，幫助我們準備最相關的資訊</p>
+      <div class="choice-list" id="interest-list">
+        <label class="choice-item"><input type="checkbox" name="interest" value="課程內容"> 課程內容</label>
+        <label class="choice-item"><input type="checkbox" name="interest" value="團體報名"> 團體報名</label>
+        <label class="choice-item"><input type="checkbox" name="interest" value="費用方式"> 費用方式</label>
+        <label class="choice-item"><input type="checkbox" name="interest" value="是否適合我的團隊"> 是否適合我的團隊</label>
+        <label class="choice-item"><input type="checkbox" name="interest" value="其他"> 其他</label>
+      </div>
+      <div class="other-input" id="interest-other-wrap">
+        <input type="text" id="interest-other" name="interest_other" placeholder="請說明你想了解的內容">
+      </div>
+    </div>
+
+    <!-- Q7 補充 -->
+    <div class="step-block visible" style="animation-delay:0.77s">
+      <div class="step-num">7</div>
+      <label class="main-label" for="q7">其他補充或想說的話</label>
+      <p class="hint">選填｜例如目前使用的工具、希望的上課時段，或任何想讓我們知道的事</p>
+      <textarea id="q7" name="note" placeholder="自由填寫…" rows="3"></textarea>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-wrap">
+      <button type="submit" class="submit-btn">
+        <span>送出意願登記</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+      </button>
+      <p class="submit-note">送出後由專人整理，於方便時段與你聯繫 🙌<br>不需立即決定是否報名</p>
+    </div>
+
+  </form>
+
+  <!-- THANK YOU -->
+  <div class="thank-you" id="thank-you">
+    <div class="thank-icon">🎉</div>
+    <h2>謝謝你的填寫！</h2>
+    <p>我們已收到你的資訊，<br>會由專人整理後，於方便時段與你聯繫。<br><br>在此之前，如有任何問題歡迎隨時來訊 🙌</p>
+  </div>
+
+</div>
+
+<script>
+  // progress tracking
+  const TOTAL = 7;
+  const progressFill = document.getElementById('progress-fill');
+  const progressPct = document.getElementById('progress-pct');
+
+  function updateProgress() {
+    let filled = 0;
+    if (document.getElementById('q1').value.trim()) filled++;
+    if (document.getElementById('q2').value.trim()) filled++;
+    const contacts = document.querySelectorAll('[data-contact]');
+    if ([...contacts].some(i => i.value.trim())) filled++;
+    if (document.querySelector('input[name="role"]:checked')) filled++;
+    if (document.querySelector('input[name="size"]:checked')) filled++;
+    if (document.querySelectorAll('input[name="interest"]:checked').length > 0) filled++;
+    if (document.getElementById('q7').value.trim()) filled++;
+
+    progressFill.style.width = (filled / TOTAL * 100) + '%';
+    progressPct.textContent = filled + ' / ' + TOTAL + ' 題';
+  }
+
+  document.getElementById('main-form').addEventListener('input', updateProgress);
+  document.getElementById('main-form').addEventListener('change', updateProgress);
+
+  // choice highlight
+  document.querySelectorAll('.choice-list').forEach(list => {
+    list.addEventListener('change', e => {
+      const isCheckbox = e.target.type === 'checkbox';
+      if (!isCheckbox) {
+        list.querySelectorAll('.choice-item').forEach(item => item.classList.remove('checked'));
+      }
+      if (e.target.checked) {
+        e.target.closest('.choice-item').classList.add('checked');
+      } else {
+        e.target.closest('.choice-item').classList.remove('checked');
+      }
+    });
+  });
+
+  // other reveal
+  document.querySelectorAll('input[name="role"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const wrap = document.getElementById('role-other-wrap');
+      wrap.classList.toggle('show', r.value === '其他' && r.checked);
+    });
+  });
+
+  document.querySelectorAll('input[name="interest"]').forEach(c => {
+    c.addEventListener('change', () => {
+      const anyOther = document.querySelector('input[name="interest"][value="其他"]').checked;
+      document.getElementById('interest-other-wrap').classList.toggle('show', anyOther);
+    });
+  });
+
+  // submit
+  document.getElementById('main-form').addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const name = document.getElementById('q1').value.trim();
+    const company = document.getElementById('q2').value.trim();
+    const contacts = [...document.querySelectorAll('[data-contact]')];
+    const hasContact = contacts.some(i => i.value.trim());
+    const role = document.querySelector('input[name="role"]:checked');
+    const size = document.querySelector('input[name="size"]:checked');
+    const interest = document.querySelectorAll('input[name="interest"]:checked');
+
+    if (!name || !company || !hasContact || !role || !size || interest.length === 0) {
+      alert('請確認所有必填欄位都已填寫，並至少填寫一種聯繫方式。');
+      return;
+    }
+
+    const btn = document.querySelector('.submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span>送出中…</span>';
+
+    const formData = new FormData(e.target);
+    // 複選欄位合併成一串
+    const interestVals = [...interest].map(i => i.value).join('、');
+    formData.delete('interest');
+    formData.append('想了解的方向', interestVals);
+
+    try {
+      const action = e.target.getAttribute('action');
+      await fetch(action, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
+      document.getElementById('main-form').style.display = 'none';
+      document.getElementById('thank-you').classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      alert('送出失敗，請稍後再試或直接以 LINE / Email 聯繫我們。');
+      btn.disabled = false;
+      btn.innerHTML = '<span>送出意願登記</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>';
+    }
+  });
+</script>
+</body>
+</html>
