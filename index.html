@@ -738,16 +738,16 @@
   });
 
   // other reveal
-  document.querySelectorAll('input[name="role"]').forEach(r => {
+  document.querySelectorAll('input[name="目前身份"]').forEach(r => {
     r.addEventListener('change', () => {
       const wrap = document.getElementById('role-other-wrap');
       wrap.classList.toggle('show', r.value === '其他' && r.checked);
     });
   });
 
-  document.querySelectorAll('input[name="interest"]').forEach(c => {
+  document.querySelectorAll('input[name="想了解的方向"]').forEach(c => {
     c.addEventListener('change', () => {
-      const anyOther = document.querySelector('input[name="interest"][value="其他"]').checked;
+      const anyOther = document.querySelector('input[name="想了解的方向"][value="其他"]').checked;
       document.getElementById('interest-other-wrap').classList.toggle('show', anyOther);
     });
   });
