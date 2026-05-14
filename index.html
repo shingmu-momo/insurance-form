@@ -902,6 +902,8 @@
       });
       document.getElementById('main-form').style.display = 'none';
       document.getElementById('thank-you').classList.add('show');
+      progressFill.style.width = '100%';
+      progressPct.textContent = '7 / 7 題';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       alert('送出失敗，請稍後再試或直接以 LINE / Email 聯繫我們。');
